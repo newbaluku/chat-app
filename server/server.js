@@ -2,6 +2,7 @@ const express = require('express'),
       path = require('path'),
       socketIO = require('socket.io'),
       http = require('http'),
+      { generateMessage } = require('./utils/message'),
       app = express();
 
 app.use(express.static(path.resolve(__dirname, '../public')));
@@ -14,30 +15,17 @@ io.on('connection', (socket) => {
   console.log('new user connected');
 
   // send only to this user (socket)
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat app',
-    createdAt: new Date().getTime()
-  });
+  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
 
   // send to all user except this user (socket)
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New user joined',
-    createdAt: new Date().getTime()
-  });
+  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
   socket.on('disconnect', () => {
     console.log('user was disconnected');
   });
 
   socket.on('createMessage', (message) => {
-    console.log(`createMessage: ${JSON.stringify(message, null, 2)}`);
-    io.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime()
-    });  
+    io.emit('newMessage', generateMessage(message.from, message.text));  
   });
 
 });
