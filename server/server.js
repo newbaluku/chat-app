@@ -13,6 +13,20 @@ const io = socketIO(server);
 io.on('connection', (socket) => {
   console.log('new user connected');
 
+  // send only to this user (socket)
+  socket.emit('newMessage', {
+    from: 'Admin',
+    text: 'Welcome to the chat app',
+    createdAt: new Date().getTime()
+  });
+
+  // send to all user except this user (socket)
+  socket.broadcast.emit('newMessage', {
+    from: 'Admin',
+    text: 'New user joined',
+    createdAt: new Date().getTime()
+  });
+
   socket.on('disconnect', () => {
     console.log('user was disconnected');
   });
