@@ -16,6 +16,16 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user was disconnected');
   });
+
+  socket.on('createMessage', (message) => {
+    console.log(`createMessage: ${JSON.stringify(message, null, 2)}`);
+    io.emit('newMessage', {
+      from: message.from,
+      text: message.text,
+      createdAt: new Date().getTime()
+    });  
+  });
+
 });
 
 server.listen(port, () => {
