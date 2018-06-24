@@ -11,25 +11,28 @@ socket.on('disconnect', function () {
 socket.on('newMessage', function (message) {
   const timestamp = moment(message.createdAt).format('h:mm a');
 
-  const li = $('<li></li>');
-  li.text(`${message.from} ${timestamp}: ${message.text}`);
+  // select the template using id and use the html() to select the markups in the template
+  const template = $('#message-template').html();
+  const html = Mustache.render(template, {
+    text: message.text,
+    from: message.from,
+    createdAt: timestamp
+  });
 
-  $('#messages').append(li);
+  $('#messages').append(html);
 })
 
 socket.on('newLocationMessage', function (message) {
   const timestamp = moment(message.createdAt).format('h:mm a');
 
-  const li = $('<li></li>');
-  const a = $(`<a target="_blank" >My current location</a>`);
+  const template = $('#location-message-template').html();
+  const html = Mustache.render(template, {
+    url: message.url,
+    from: message.from,
+    createdAt: timestamp
+  });
 
-  // using text and attr methods to add url and text to tags to prevent
-  // malicious attempt by user to insert html elements
-  li.text(`${message.from} ${timestamp}: `);
-  a.attr('href', message.url);
-  li.append(a);
-
-  $('#messages').append(li);
+  $('#messages').append(html);
 });
 
 const messageTextBox = $('[name=message]');
