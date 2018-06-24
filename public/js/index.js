@@ -9,19 +9,23 @@ socket.on('disconnect', function () {
 });
 
 socket.on('newMessage', function (message) {
+  const timestamp = moment(message.createdAt).format('h:mm a');
+
   const li = $('<li></li>');
-  li.text(`${message.from}: ${message.text}`);
+  li.text(`${message.from} ${timestamp}: ${message.text}`);
 
   $('#messages').append(li);
 })
 
 socket.on('newLocationMessage', function (message) {
+  const timestamp = moment(message.createdAt).format('h:mm a');
+
   const li = $('<li></li>');
   const a = $(`<a target="_blank" >My current location</a>`);
 
   // using text and attr methods to add url and text to tags to prevent
   // malicious attempt by user to insert html elements
-  li.text(`${message.from}: `);
+  li.text(`${message.from} ${timestamp}: `);
   a.attr('href', message.url);
   li.append(a);
 
