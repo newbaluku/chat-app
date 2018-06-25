@@ -3,6 +3,7 @@ const express = require('express'),
       socketIO = require('socket.io'),
       http = require('http'),
       { generateMessage, generateLocationMessage } = require('./utils/message'),
+      { isRealString } = require('./utils/validation'),
       app = express();
 
 app.use(express.static(path.resolve(__dirname, '../public')));
@@ -14,14 +15,25 @@ const io = socketIO(server);
 io.on('connection', (socket) => {
   console.log('new user connected');
 
-  // send only to this user (socket)
-  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
-
-  // send to all user except this user (socket)
-  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
-
   socket.on('disconnect', () => {
     console.log('user was disconnected');
+  });
+
+  socket.on('join', (params, callback) => {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback('Name and room name are required');
+    }
+    else {
+      socket.join(params.room);
+
+      // send only to this user (socket)
+      socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+
+      // send to all user except this user (socket)
+      socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined`));
+
+      callback();
+    }
   });
 
   socket.on('createMessage', (message, callback) => {
